@@ -391,7 +391,7 @@ with tab_dashboard:
         else:
             st.markdown("<div class='metric-card index-card'><div class='label'>Indice MASI 20</div><div class='value'>—</div></div>", unsafe_allow_html=True)
 
-       # ======================== CARTES DES CONTRATS À TERME ========================
+    # ======================== CARTES DES CONTRATS À TERME ========================
     for i, ticker in enumerate(CONTRACT_ORDER):
         with cols[i+1]:
             qsub = quotes_day[quotes_day["ticker"] == ticker] if not quotes_day.empty else pd.DataFrame()
