@@ -20,7 +20,15 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-DB_PATH = Path(__file__).parent / "masi20.db"
+import tempfile, os
+# On Streamlit Cloud the filesystem is ephemeral; /tmp is writable.
+# Locally, keep the DB next to app.py so data persists between runs.
+_IS_CLOUD = os.environ.get("STREAMLIT_RUNTIME_ENV") == "cloud" or os.environ.get("HOSTNAME", "").startswith("streamlit")
+_LOCAL_DB = Path(__file__).parent / "masi20.db"
+if _IS_CLOUD or not _LOCAL_DB.parent.exists():
+    DB_PATH = Path(tempfile.gettempdir()) / "masi20.db"
+else:
+    DB_PATH = _LOCAL_DB
 
 CONTRACT_ORDER = ["FMASI20JUI26", "FMASI20SEP26", "FMASI20DEC26", "FMASI20MAR27"]
 CONTRACT_LABELS = {
