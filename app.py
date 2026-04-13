@@ -391,21 +391,39 @@ with tab_dashboard:
         else:
             st.markdown("<div class='metric-card index-card'><div class='label'>Indice MASI 20</div><div class='value'>—</div></div>", unsafe_allow_html=True)
 
+       # ======================== CARTES DES CONTRATS À TERME ========================
     for i, ticker in enumerate(CONTRACT_ORDER):
         with cols[i+1]:
             qsub = quotes_day[quotes_day["ticker"] == ticker] if not quotes_day.empty else pd.DataFrame()
+            
             if not qsub.empty:
-                clot = qsub.iloc[0]["cloture"]; ref = qsub.iloc[0]["cours_reference"]
+                row = qsub.iloc[0]
+                # ✅ PRIORITÉ : Clôture si elle existe et > 0, sinon on prend Cours de Compensation
+                cloture_display = row["cloture"]
+                if pd.isna(cloture_display) or cloture_display <= 0:
+                    cloture_display = row.get("cours_compensation", 0)
+                
+                ref = row["cours_reference"]
+                
                 delta_html = ""
-                if clot and ref and ref != 0:
-                    chg = (clot - ref) / ref * 100
+                if cloture_display and ref and ref != 0:
+                    chg = (cloture_display - ref) / ref * 100
                     cls = "delta-up" if chg > 0 else ("delta-down" if chg < 0 else "delta-flat")
                     arrow = "▲" if chg > 0 else ("▼" if chg < 0 else "■")
                     delta_html = f"<div class='{cls}'>{arrow} {chg:+.2f}%</div>"
-                st.markdown(f"<div class='metric-card'><div class='label'>{CONTRACT_LABELS[ticker]}</div><div class='value'>{clot:,.2f}</div>{delta_html}</div>", unsafe_allow_html=True)
+
+                # Petit indicateur quand on utilise la compensation
+                note = " (Comp.)" if (pd.isna(row["cloture"]) or row["cloture"] <= 0) else ""
+
+                st.markdown(f"""
+                <div class='metric-card'>
+                    <div class='label'>{CONTRACT_LABELS[ticker]}{note}</div>
+                    <div class='value'>{cloture_display:,.2f}</div>
+                    {delta_html}
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 st.markdown(f"<div class='metric-card'><div class='label'>{CONTRACT_LABELS[ticker]}</div><div class='value'>—</div></div>", unsafe_allow_html=True)
-
     st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
     c2 = st.columns(5)
     if not tx_day.empty:
