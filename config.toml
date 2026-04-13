@@ -2,10 +2,10 @@
 headless = true
 enableCORS = false
 enableXsrfProtection = true
- 
+
 [browser]
 gatherUsageStats = false
- 
+
 [theme]
 base = "light"
 primaryColor = "#C8A24B"
